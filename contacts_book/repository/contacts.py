@@ -61,23 +61,35 @@ async def delete_contact(contact_id: int, db: Session) -> Contact:
 
 
 async def get_upcoming_birthdays(db: Session) -> List[Contact]:
-    result = []
+    res_contacts = []
+    cur_contacts = []
+
+    # get contacts with limit and offset
+    limit = 100
+    offset = 0
+    flag = True
+    while flag:
+        contacts_db = await get_contacts(limit, offset, None, db)
+        if not len(contacts_db):
+            flag = False
+        cur_contacts.extend(contacts_db)
+        offset += limit
     
-    start_date = datetime(datetime.now().year, datetime.now().month, datetime.now().day)
-    list_date = []
+    # get list of next seven days
+    date = datetime(datetime.now().year, datetime.now().month, datetime.now().day)
+    list_dates = []
     
     count = 1
     while count <= 7:
-        start_date += timedelta(1)
-        list_date.append(start_date)
+        date += timedelta(1)
+        # year = 1 for next equalization dates by month and day
+        list_dates.append(datetime(1, date.month, date.day))
         count += 1
     
-    contacts = db.query(Contact).all()
-
-    for date in list_date:
-        for contact in contacts:
-            if contact.birthday.month == date.month and contact.birthday.day == date.day:
-                result.append(contact)
-                break
+    # equalization dates
+    for contact in cur_contacts:
+        # year = 1, this is equalization dates by month and day
+        if datetime(1, contact.birthday.month, contact.birthday.day) in list_dates:
+            res_contacts.append(contact)
     
-    return result
+    return res_contacts
