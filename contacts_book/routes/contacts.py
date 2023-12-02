@@ -7,7 +7,7 @@ from contacts_book.database.db import get_db
 from contacts_book.schemas import ContactModel, ContactResponce
 from contacts_book.repository import contacts as repository_contacts
 
-router = APIRouter(prefix='/contacts', tags=["contacts"])
+router = APIRouter(prefix='/contacts', tags=["Contacts"])
 
 
 @router.get("/", response_model=List[ContactResponce], name="Read contacts")
